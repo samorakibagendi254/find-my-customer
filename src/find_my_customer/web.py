@@ -253,7 +253,8 @@ def health_ready() -> dict:
 @app.get("/api/release", include_in_schema=False)
 def release_identity() -> dict:
     settings = get_settings()
-    return {"release_sha": settings.release_sha, "model": settings.openai_model, "schema_version": 1}
+    model = settings.nvidia_model if settings.provider == "nvidia" else settings.openai_model
+    return {"release_sha": settings.release_sha, "provider": settings.provider, "model": model, "schema_version": 1}
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -299,7 +300,7 @@ def create_run(request: Request, payload: RunRequest):
             status="queued",
             stage="queued",
             workflow_sha=settings.release_sha,
-            model=settings.openai_model,
+            model=settings.nvidia_model if settings.provider == "nvidia" else settings.openai_model,
         )
         session.add(run)
         session.flush()
