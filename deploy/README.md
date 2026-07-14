@@ -14,3 +14,9 @@ The production stack is isolated at `/opt/find-my-customer` and binds only to `1
 7. Keep the previous digest and tunnel config for rollback.
 
 Secrets are owner-readable files in `shared/secrets/` and are mounted through Compose secrets. The admin password file contains an Argon2id encoded hash, never a plaintext password. Secrets must never enter `.env`, the image, GitHub logs, or shell history.
+
+Generate the admin hash locally without echoing the password, then place only the printed hash in `shared/secrets/admin_password_hash`:
+
+```powershell
+python -c "from getpass import getpass; from argon2 import PasswordHasher; print(PasswordHasher().hash(getpass()))"
+```
