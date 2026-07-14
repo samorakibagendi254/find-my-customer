@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling==1.28.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "find-my-customer"
+version = "0.2.0"
+description = "Auditable first-customer research skill and web portal"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+  "fastapi==0.139.0",
+  "jinja2==3.1.6",
+  "openai==2.45.0",
+  "psycopg[binary]==3.3.4",
+  "PyJWT[crypto]==2.13.0",
+  "sqlalchemy==2.0.51",
+  "uvicorn[standard]==0.51.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx==0.28.1",
+  "pip-audit==2.10.1",
+  "pytest==9.0.3",
+  "pytest-cov==7.0.0",
+]
+
+[project.scripts]
+find-my-customer = "find_my_customer.web:main"
+find-my-customer-worker = "find_my_customer.worker:main"
+find-my-customer-migrate = "find_my_customer.database:migrate"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/find_my_customer"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["find_my_customer"]
+branch = true

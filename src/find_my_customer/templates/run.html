@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Run {{ run.id[:8] }} — Find My Customer{% endblock %}
+{% block content %}
+<section class="run-shell" data-run-id="{{ run.id }}" data-run-status="{{ run.status }}">
+  <a class="back-link" href="/">← Mission control</a>
+  <header class="run-hero">
+    <div>
+      <p class="eyebrow"><span class="status-orb status-{{ run.status }}"></span> {{ run.status }}</p>
+      <h1>{{ run.startup_url }}</h1>
+      <p>{{ run.mode }} research · {{ run.focus|replace('-', ' ') }} · started {{ run.created_at.strftime('%d %b %Y at %H:%M UTC') }}</p>
+    </div>
+    {% if run.status == 'completed' %}<a class="report-button" href="/runs/{{ run.id }}/report">Open report <span>↗</span></a>{% endif %}
+  </header>
+
+  <section class="stage-panel" aria-labelledby="stage-title">
+    <div class="panel-heading"><div><p class="eyebrow">Live workflow</p><h2 id="stage-title">Research progress</h2></div><span id="stage-state">{{ run.stage|replace('-', ' ') }}</span></div>
+    {% set stages = ['queued', 'researching', 'qualifying', 'validating', 'rendering', 'completed'] %}
+    {% set active_index = stages.index(run.stage) if run.stage in stages else -1 %}
+    <ol class="stage-track" id="stage-track">
+      {% for stage in stages %}
+      <li data-stage="{{ stage }}" class="{% if loop.index0 < active_index or run.status == 'completed' %}done{% endif %} {% if loop.index0 == active_index %}current{% endif %}"><i>{{ loop.index }}</i><span>{{ stage|replace('-', ' ') }}</span></li>
+      {% endfor %}
+    </ol>
+    <p class="live-message" id="live-message" aria-live="polite">{% if events %}{{ events[-1].message }}{% endif %}</p>
+    {% if run.status == 'failed' %}<div class="failure"><b>{{ run.error_code }}</b><p>{{ run.error_message }}</p></div>{% endif %}
+  </section>
+
+  <div class="run-grid">
+    <section class="audit-panel">
+      <div class="panel-heading"><div><p class="eyebrow">Append-only log</p><h2>Audit timeline</h2></div><span>{{ events|length }} events</span></div>
+      <ol class="event-list" id="event-list">
+        {% for event in events %}<li data-event-id="{{ event.id }}"><time>{{ event.created_at.strftime('%H:%M:%S') }}</time><div><b>{{ event.stage|replace('-', ' ') }}</b><p>{{ event.message }}</p></div></li>{% endfor %}
+      </ol>
+    </section>
+    <aside class="evidence-panel">
+      <p class="eyebrow">Release evidence</p>
+      <dl>
+        <div><dt>Workflow SHA</dt><dd><code>{{ run.workflow_sha[:12] }}</code></dd></div>
+        <div><dt>Prompt hash</dt><dd><code>{{ run.prompt_hash[:12] if run.prompt_hash else 'pending' }}</code></dd></div>
+        <div><dt>Model</dt><dd>{{ run.model }}</dd></div>
+        <div><dt>Provider response</dt><dd><code>{{ run.provider_response_id or 'pending' }}</code></dd></div>
+      </dl>
+      {% if artifacts %}<h3>Immutable artifacts</h3><ul class="artifact-list">{% for artifact in artifacts %}<li><a href="/runs/{{ run.id }}/artifacts/{{ artifact.kind }}"><span>{{ artifact.kind|replace('-', ' ') }}</span><small>{{ artifact.size_bytes }} B · {{ artifact.sha256[:8] }}</small></a></li>{% endfor %}</ul>{% endif %}
+    </aside>
+  </div>
+  {% if run.status == 'completed' %}<section class="report-frame-wrap"><div class="panel-heading"><div><p class="eyebrow">Final intelligence</p><h2>Evidence-backed report</h2></div><a href="/runs/{{ run.id }}/report">Open full screen ↗</a></div><iframe title="Customer research report" src="/runs/{{ run.id }}/report" sandbox></iframe></section>{% endif %}
+</section>
+{% endblock %}

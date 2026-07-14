@@ -1,0 +1,135 @@
+name: find-my-customer
+
+x-app: &app
+  image: ${FMC_IMAGE:?Set FMC_IMAGE to an immutable image digest}
+  restart: unless-stopped
+  init: true
+  env_file:
+    - .env
+  environment:
+    DATABASE_URL_FILE: /run/secrets/database_url
+    FMC_CF_ACCESS_AUDIENCE_FILE: /run/secrets/cf_access_audience
+  secrets:
+    - database_url
+    - cf_access_audience
+  networks:
+    - app
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  read_only: true
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+  pids_limit: 180
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+
+services:
+  migrate:
+    <<: *app
+    restart: "no"
+    command: ["python", "-m", "find_my_customer.database"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    <<: *app
+    container_name: find-my-customer-app
+    command: ["python", "-m", "find_my_customer.web"]
+    ports:
+      - "127.0.0.1:4314:8000"
+    networks:
+      - app
+      - egress
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    mem_limit: 512m
+    cpus: 1.0
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+
+  worker:
+    <<: *app
+    container_name: find-my-customer-worker
+    command: ["python", "-m", "find_my_customer.worker"]
+    environment:
+      DATABASE_URL_FILE: /run/secrets/database_url
+      FMC_CF_ACCESS_AUDIENCE_FILE: /run/secrets/cf_access_audience
+      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
+    secrets:
+      - database_url
+      - cf_access_audience
+      - openai_api_key
+    networks:
+      - app
+      - egress
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    mem_limit: 768m
+    cpus: 1.0
+
+  postgres:
+    image: postgres:16.9-bookworm@sha256:253815cf7579ffa05e1673d92e78d37273e61be0e4414e9a1449337d7925be94
+    container_name: find-my-customer-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: find_my_customer
+      POSTGRES_USER: find_my_customer
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app
+    mem_limit: 384m
+    cpus: 0.75
+    pids_limit: 160
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U find_my_customer -d find_my_customer"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  app:
+    name: find-my-customer-internal
+    internal: true
+  egress:
+    name: find-my-customer-egress
+
+volumes:
+  postgres-data:
+    name: find-my-customer-postgres-data
+
+secrets:
+  database_url:
+    file: ./secrets/database_url
+  postgres_password:
+    file: ./secrets/postgres_password
+  openai_api_key:
+    file: ./secrets/openai_api_key
+  cf_access_audience:
+    file: ./secrets/cf_access_audience

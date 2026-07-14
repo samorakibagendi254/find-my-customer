@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b0d0c">
+  {% if csrf %}<meta name="csrf-token" content="{{ csrf }}">{% endif %}
+  <title>{% block title %}Find My Customer{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='/portal.css') }}">
+  <script src="{{ url_for('static', path='/portal.js') }}" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="Find My Customer home">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span>Find My Customer</span>
+    </a>
+    <div class="identity"><span class="live-dot" aria-hidden="true"></span><span>{{ identity.email }}</span></div>
+  </header>
+  <main id="main">{% block content %}{% endblock %}</main>
+  <footer class="site-footer">
+    <span>Public signals. Human outreach.</span>
+    <span>Every run leaves an audit trail.</span>
+  </footer>
+</body>
+</html>

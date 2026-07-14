@@ -199,7 +199,7 @@ def build_html(data: dict[str, Any], css: str) -> str:
 <body>
   <a class="skip" href="#main">Skip to report</a>
   <div class="shell">
-    <header class="topbar"><div class="brand"><i></i> Find First Customers</div><div><span class="badge">Public signals only</span><button type="button" onclick="window.print()">Print / Save PDF</button></div></header>
+    <header class="topbar"><div class="brand"><i></i> Find First Customers</div><div><span class="badge">Public signals only</span><span class="badge">Print-ready</span></div></header>
     <main id="main">
       <section class="hero">
         <div><p class="kicker">Early-customer intelligence · {esc(data['generated_at'])}</p><h1>{esc(data['title'])}</h1><p class="lede">{esc(data['verdict']['summary'])}</p></div>

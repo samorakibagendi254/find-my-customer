@@ -1,0 +1,13 @@
+.git
+.github
+.pytest_cache
+.mypy_cache
+.coverage
+__pycache__
+*.pyc
+*.pyo
+*.tgz
+node_modules
+outputs
+find-my-customer.db
+tests

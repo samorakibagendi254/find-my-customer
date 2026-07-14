@@ -63,9 +63,9 @@ class GenerateReportTests(unittest.TestCase):
             html = output.read_text(encoding="utf-8")
             self.assertTrue(html.startswith("<!doctype html>"))
             self.assertIn("SignalDesk", html)
-            self.assertIn("Print / Save PDF", html)
+            self.assertIn("Print-ready", html)
+            self.assertNotIn("onclick=", html)
 
 
 if __name__ == "__main__":
     unittest.main()
-

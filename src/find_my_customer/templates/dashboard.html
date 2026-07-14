@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Find My Customer — Research Console{% endblock %}
+{% block content %}
+<section class="hero-grid">
+  <div class="hero-copy">
+    <p class="eyebrow"><span></span> Customer discovery agent</p>
+    <h1>Find the people<br>already asking for <em>you.</em></h1>
+    <p class="hero-lede">Turn a startup URL into an evidence-backed shortlist of early customers, complete with public buying signals and thoughtful outreach openers.</p>
+    <div class="trust-strip" aria-label="Research principles">
+      <span>Original sources</span><span>Deterministic scores</span><span>No auto-send</span>
+    </div>
+  </div>
+
+  <form class="composer" id="run-form" novalidate>
+    <div class="composer-head">
+      <div><p class="eyebrow">New mission</p><h2>Start a customer search</h2></div>
+      <span class="release">v {{ release }}</span>
+    </div>
+    <label for="startup-url">Startup URL</label>
+    <div class="url-field"><span aria-hidden="true">↗</span><input id="startup-url" name="startup_url" type="url" inputmode="url" autocomplete="url" placeholder="https://yourstartup.com" required></div>
+    <label for="description">What are you building? <small>Optional, but useful</small></label>
+    <textarea id="description" name="description" maxlength="1500" rows="4" placeholder="A crisp sentence about the product, outcome, and who it is for."></textarea>
+
+    <fieldset>
+      <legend>Research depth</legend>
+      <div class="choice-grid" data-choice-group>
+        <label><input type="radio" name="mode" value="quick"><span><b>Quick</b><small>Up to 5 leads</small></span></label>
+        <label><input type="radio" name="mode" value="standard" checked><span><b>Standard</b><small>Up to 10 leads</small></span></label>
+        <label><input type="radio" name="mode" value="deep"><span><b>Deep</b><small>Up to 20 leads</small></span></label>
+      </div>
+    </fieldset>
+
+    <label for="focus">Prospect focus</label>
+    <select id="focus" name="focus">
+      <option value="general">Best overall fit</option>
+      <option value="design-partners">Design partners</option>
+      <option value="b2b">B2B decision makers</option>
+      <option value="community">Community early adopters</option>
+    </select>
+    <p class="form-error" id="form-error" role="alert" hidden></p>
+    <button class="launch-button" type="submit" data-submit>
+      <span data-idle>Launch research</span>
+      <span class="loading-dots" data-loading hidden><i></i><i></i><i></i><span class="sr-only">Submitting</span></span>
+      <span data-done hidden>Mission queued ✓</span>
+      <b aria-hidden="true">↗</b>
+    </button>
+    <p class="privacy-note">Uses public professional signals only. Nothing is sent automatically.</p>
+  </form>
+</section>
+
+<section class="runs-section">
+  <header class="section-heading">
+    <div><p class="eyebrow">Mission control</p><h2>Recent research runs</h2></div>
+    <span>{{ runs|length }} retained</span>
+  </header>
+  {% if runs %}
+  <div class="run-list">
+    {% for run in runs %}
+    <a class="run-card" href="/runs/{{ run.id }}">
+      <span class="status-orb status-{{ run.status }}" aria-hidden="true"></span>
+      <div class="run-main"><b>{{ run.startup_url }}</b><small>{{ run.mode }} · {{ run.focus }} · {{ run.created_at.strftime('%d %b %Y, %H:%M') }}</small></div>
+      <span class="status-label">{{ run.stage|replace('-', ' ') }}</span>
+      <span class="arrow" aria-hidden="true">→</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state"><span class="empty-radar" aria-hidden="true"><i></i></span><div><h3>Your signal map starts here.</h3><p>Launch the first research run and this space becomes your prospect intelligence archive.</p></div></div>
+  {% endif %}
+</section>
+{% endblock %}
