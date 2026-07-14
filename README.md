@@ -19,7 +19,7 @@ The repository is the source of truth. The `find-first-customers/` directory is 
 - Standard-library Python implementation with no runtime dependencies
 - Durable portal runs, events, artifacts, and release identity
 - OpenAI Responses API research with built-in web search only
-- Cloudflare Access JWT verification at the origin
+- Self-hosted Argon2id login with expiring, revocable database sessions
 
 The skill never sends messages automatically and never treats a public signal as consent or confirmed buying intent.
 
@@ -135,7 +135,7 @@ Production runs as an isolated Compose project in `/opt/find-my-customer`:
 - `postgres` — private durable run and artifact store
 - `migrate` — one-shot additive schema migration
 
-Cloudflare Tunnel publishes `agentzero.kitabu.ai`; Cloudflare Access protects the entire hostname. The application independently validates the Access JWT audience, issuer, signature, subject, and allowed email. The shared Kitabu Compose and Caddy configuration are not modified.
+Cloudflare Tunnel publishes `agentzero.kitabu.ai`; the portal protects the hostname with its own Argon2id login and expiring, revocable sessions. The shared Kitabu Compose and Caddy configuration are not modified.
 
 See `deploy/README.md` for immutable release, verification, backup, and rollback requirements.
 
@@ -147,7 +147,7 @@ See `deploy/README.md` for immutable release, verification, backup, and rollback
 - Mutations require same-origin CSRF validation and per-owner quotas.
 - Every artifact route rechecks ownership.
 - Reports are escaped, CSP-restricted, and sandboxed when embedded.
-- Production refuses fixture mode, SQLite, missing Access configuration, or a missing worker API key.
+- Production refuses fixture mode, SQLite, missing local-login secrets, or a missing worker API key.
 
 ## Scoring
 

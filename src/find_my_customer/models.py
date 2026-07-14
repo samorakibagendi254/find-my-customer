@@ -15,6 +15,18 @@ class Base(DeclarativeBase):
     pass
 
 
+class AuthSession(Base):
+    __tablename__ = "auth_sessions"
+
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    subject: Mapped[str] = mapped_column(String(255), index=True)
+    email: Mapped[str] = mapped_column(String(320), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class ResearchRun(Base):
     __tablename__ = "research_runs"
 

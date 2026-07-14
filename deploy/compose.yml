@@ -8,10 +8,8 @@ x-app: &app
     - .env
   environment:
     DATABASE_URL_FILE: /run/secrets/database_url
-    FMC_CF_ACCESS_AUDIENCE_FILE: /run/secrets/cf_access_audience
   secrets:
     - database_url
-    - cf_access_audience
   networks:
     - app
   cap_drop:
@@ -41,6 +39,12 @@ services:
     <<: *app
     container_name: find-my-customer-app
     command: ["python", "-m", "find_my_customer.web"]
+    environment:
+      DATABASE_URL_FILE: /run/secrets/database_url
+      FMC_ADMIN_PASSWORD_HASH_FILE: /run/secrets/admin_password_hash
+    secrets:
+      - database_url
+      - admin_password_hash
     ports:
       - "127.0.0.1:4314:8000"
     networks:
@@ -66,11 +70,9 @@ services:
     command: ["python", "-m", "find_my_customer.worker"]
     environment:
       DATABASE_URL_FILE: /run/secrets/database_url
-      FMC_CF_ACCESS_AUDIENCE_FILE: /run/secrets/cf_access_audience
       OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
     secrets:
       - database_url
-      - cf_access_audience
       - openai_api_key
     networks:
       - app
@@ -131,5 +133,5 @@ secrets:
     file: ./secrets/postgres_password
   openai_api_key:
     file: ./secrets/openai_api_key
-  cf_access_audience:
-    file: ./secrets/cf_access_audience
+  admin_password_hash:
+    file: ./secrets/admin_password_hash

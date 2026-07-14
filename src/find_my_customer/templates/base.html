@@ -12,12 +12,20 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header">
+  <header class="site-header{% if not identity %} public-header{% endif %}">
     <a class="wordmark" href="/" aria-label="Find My Customer home">
       <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
       <span>Find My Customer</span>
     </a>
-    <div class="identity"><span class="live-dot" aria-hidden="true"></span><span>{{ identity.email }}</span></div>
+    {% if identity %}
+    <div class="header-actions">
+      <div class="identity"><span class="live-dot" aria-hidden="true"></span><span>{{ identity.email }}</span></div>
+      <form method="post" action="/logout" class="logout-form">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button type="submit">Sign out</button>
+      </form>
+    </div>
+    {% endif %}
   </header>
   <main id="main">{% block content %}{% endblock %}</main>
   <footer class="site-footer">

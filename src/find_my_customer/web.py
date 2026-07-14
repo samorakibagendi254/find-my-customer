@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 import asyncio
+import hmac
 import json
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Annotated, Literal
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from fastapi import FastAPI, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -19,7 +20,20 @@ from .config import get_settings
 from .database import engine, migrate, session_factory
 from .models import ResearchRun, RunArtifact, RunEvent
 from .repository import append_event, count_active, count_since, get_run, list_runs, store_artifact
-from .security import Identity, current_identity, new_csrf_token, require_csrf, validate_public_url
+from .security import (
+    SESSION_COOKIE,
+    _DUMMY_PASSWORD_HASH,
+    Identity,
+    create_session,
+    current_identity,
+    login_key,
+    login_limiter,
+    new_csrf_token,
+    require_csrf,
+    revoke_session,
+    validate_public_url,
+    verify_password,
+)
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
@@ -97,12 +111,15 @@ async def security_headers(request: Request, call_next):
     elif request.method in {"POST", "PUT", "PATCH"} and content_length > 16_384:
         response = JSONResponse({"detail": "Request body too large"}, status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
     else:
-        public = request.url.path in {"/health/live", "/health/ready", "/api/release"} or request.url.path.startswith("/static/")
+        public = request.url.path in {"/health/live", "/health/ready", "/api/release", "/login"} or request.url.path.startswith("/static/")
         if not public:
             try:
                 request.state.identity = current_identity(request)
             except HTTPException as error:
-                response = JSONResponse({"detail": error.detail}, status_code=error.status_code, headers=error.headers)
+                if settings.auth_mode == "local" and request.method == "GET" and not request.url.path.startswith("/api/"):
+                    response = RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
+                else:
+                    response = JSONResponse({"detail": error.detail}, status_code=error.status_code, headers=error.headers)
             else:
                 response = await call_next(request)
         else:
@@ -125,6 +142,8 @@ async def security_headers(request: Request, call_next):
         )
     if settings.production:
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    if request.url.path in {"/login", "/logout"} or request.url.path.startswith("/api/auth"):
+        response.headers["Cache-Control"] = "no-store"
     return response
 
 
@@ -142,6 +161,81 @@ def _owned_run(run_id: str, identity: Identity) -> ResearchRun:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Run not found")
         session.expunge(run)
         return run
+
+
+def _csrf_response(response: Response, csrf: str) -> Response:
+    settings = get_settings()
+    response.set_cookie(
+        "fmc_csrf",
+        csrf,
+        secure=settings.production,
+        httponly=False,
+        samesite="strict",
+        max_age=8 * 60 * 60,
+        path="/",
+    )
+    return response
+
+
+@app.get("/login", response_class=HTMLResponse)
+def login_page(request: Request):
+    if get_settings().auth_mode != "local":
+        return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+    csrf = request.cookies.get("fmc_csrf") or new_csrf_token()
+    response = templates.TemplateResponse(request=request, name="login.html", context={"csrf": csrf})
+    return _csrf_response(response, csrf)
+
+
+@app.post("/login", response_class=HTMLResponse)
+async def login_submit(request: Request):
+    settings = get_settings()
+    if settings.auth_mode != "local":
+        return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+    try:
+        values = parse_qs((await request.body()).decode("utf-8"), keep_blank_values=True)
+    except UnicodeDecodeError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid form encoding")
+    email = values.get("email", [""])[0].strip().lower()
+    password = values.get("password", [""])[0]
+    submitted_csrf = values.get("csrf", [""])[0]
+    require_csrf(request, submitted_csrf)
+    key = login_key(request, email)
+    retry_after = login_limiter.blocked(key)
+    if retry_after:
+        response = HTMLResponse("Too many login attempts. Try again later.", status_code=status.HTTP_429_TOO_MANY_REQUESTS)
+        response.headers["Retry-After"] = str(retry_after)
+        return response
+    candidate_hash = settings.admin_password_hash or _DUMMY_PASSWORD_HASH
+    password_valid = verify_password(password, candidate_hash)
+    email_valid = bool(settings.admin_email) and hmac.compare_digest(email, settings.admin_email)
+    if not (password_valid and email_valid):
+        login_limiter.failure(key)
+        return HTMLResponse("Invalid email or password.", status_code=status.HTTP_401_UNAUTHORIZED)
+    login_limiter.success(key)
+    identity = Identity(subject=f"local:{settings.admin_email}", email=settings.admin_email)
+    token = create_session(identity)
+    response = RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(
+        SESSION_COOKIE,
+        token,
+        secure=settings.production,
+        httponly=True,
+        samesite="strict",
+        max_age=8 * 60 * 60,
+        path="/",
+    )
+    return response
+
+
+@app.post("/logout")
+async def logout(request: Request):
+    body = parse_qs((await request.body()).decode("utf-8"), keep_blank_values=True)
+    require_csrf(request, body.get("csrf", [""])[0])
+    token = request.cookies.get(SESSION_COOKIE, "")
+    revoke_session(token)
+    response = RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
+    response.delete_cookie(SESSION_COOKIE, path="/")
+    return response
 
 
 @app.get("/health/live", include_in_schema=False)

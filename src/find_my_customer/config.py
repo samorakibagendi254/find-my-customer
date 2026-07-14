@@ -20,6 +20,8 @@ class Settings:
     database_url: str
     public_origin: str
     auth_mode: str
+    admin_email: str
+    admin_password_hash: str
     cloudflare_team_domain: str
     cloudflare_access_audience: str
     allowed_emails: tuple[str, ...]
@@ -36,8 +38,11 @@ class Settings:
         return self.environment == "production"
 
     def validate(self, *, role: str) -> None:
-        if self.production and self.auth_mode != "cloudflare":
-            raise RuntimeError("production requires FMC_AUTH_MODE=cloudflare")
+        if self.production and self.auth_mode not in {"cloudflare", "local"}:
+            raise RuntimeError("production requires FMC_AUTH_MODE=local or cloudflare")
+        if self.auth_mode == "local" and self.production:
+            if not self.admin_email or not self.admin_password_hash:
+                raise RuntimeError("local production auth requires FMC_ADMIN_EMAIL and password hash")
         if self.auth_mode == "cloudflare":
             if not self.cloudflare_team_domain or not self.cloudflare_access_audience:
                 raise RuntimeError("Cloudflare Access team domain and audience are required")
@@ -61,6 +66,8 @@ def get_settings() -> Settings:
         database_url=_secret("DATABASE_URL", default_db),
         public_origin=os.getenv("FMC_PUBLIC_ORIGIN", "http://127.0.0.1:8000").rstrip("/"),
         auth_mode=os.getenv("FMC_AUTH_MODE", "development").strip().lower(),
+        admin_email=os.getenv("FMC_ADMIN_EMAIL", "").strip().lower(),
+        admin_password_hash=_secret("FMC_ADMIN_PASSWORD_HASH"),
         cloudflare_team_domain=os.getenv("FMC_CF_TEAM_DOMAIN", "").rstrip("/"),
         cloudflare_access_audience=_secret("FMC_CF_ACCESS_AUDIENCE"),
         allowed_emails=emails,
