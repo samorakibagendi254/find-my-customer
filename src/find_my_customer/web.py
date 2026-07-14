@@ -37,7 +37,14 @@ from .security import (
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
-templates = Jinja2Templates(directory=PACKAGE_ROOT / "templates")
+
+
+def _template_context(request: Request) -> dict[str, str]:
+    del request
+    return {"asset_version": get_settings().release_sha[:12]}
+
+
+templates = Jinja2Templates(directory=PACKAGE_ROOT / "templates", context_processors=[_template_context])
 
 
 class RunRequest(BaseModel):

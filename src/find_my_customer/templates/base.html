@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#0b0d0c">
   {% if csrf %}<meta name="csrf-token" content="{{ csrf }}">{% endif %}
   <title>{% block title %}Find My Customer{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', path='/portal.css') }}">
-  <script src="{{ url_for('static', path='/portal.js') }}" defer></script>
+  <link rel="stylesheet" href="{{ url_for('static', path='/portal.css') }}?v={{ asset_version }}">
+  <script src="{{ url_for('static', path='/portal.js') }}?v={{ asset_version }}" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>

@@ -86,6 +86,13 @@ def test_release_endpoint_is_machine_verifiable(portal):
     assert response.json()["schema_version"] == 1
 
 
+def test_static_assets_are_versioned_by_release(portal):
+    response = portal.get("/")
+    assert response.status_code == 200
+    assert "/static/portal.css?v=aaaaaaaaaaaa" in response.text
+    assert "/static/portal.js?v=aaaaaaaaaaaa" in response.text
+
+
 def test_source_ledger_must_cover_every_evidence_url():
     from find_my_customer.worker import _verify_source_ledger
 
