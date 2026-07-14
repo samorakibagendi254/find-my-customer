@@ -2,6 +2,7 @@
 Thumbs.db
 node_modules/
 outputs/
+.env
 *.tgz
 __pycache__/
 *.py[cod]

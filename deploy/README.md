@@ -8,7 +8,7 @@ The production stack is isolated at `/opt/find-my-customer` and binds only to `1
 2. Resolve the tag to its immutable digest and set `FMC_IMAGE` to the digest, never a mutable tag.
 3. Capture the current Compose state, database backup, and complete Cloudflare Tunnel ingress list.
 4. Acquire `/opt/find-my-customer/deploy.lock` before mutation.
-5. Install `database_url`, `postgres_password`, `admin_password_hash`, and `openai_api_key` as owner-readable secret files; app secrets must be readable by container UID `10001`.
+5. Install `database_url`, `postgres_password`, `admin_password_hash`, and `nvidia_api_key` as owner-readable secret files; app secrets must be readable by container UID `10001`.
 6. Run the one-shot migration, then activate app and worker.
 7. Verify loopback readiness, `/api/release`, login denial without a session, authenticated critical flow, and every pre-existing tunnel hostname.
 7. Keep the previous digest and tunnel config for rollback.

@@ -5,7 +5,7 @@ from dataclasses import replace
 
 from find_my_customer.config import get_settings
 from find_my_customer.prompt import build_prompt
-from find_my_customer.provider import OpenAIProvider
+from find_my_customer.provider import NvidiaProvider, OpenAIProvider
 from find_my_customer.skill_runtime import REPOSITORY_ROOT
 
 
@@ -42,6 +42,36 @@ class FakeClient:
         self.responses = FakeResponses()
 
 
+class FakeChatCompletion:
+    id = "chatcmpl_test"
+
+    class Choice:
+        class Message:
+            content = (REPOSITORY_ROOT / "examples" / "analysis.example.json").read_text(encoding="utf-8")
+
+        message = Message()
+
+    choices = [Choice()]
+
+    def model_dump(self, mode="json"):
+        assert mode == "json"
+        return {"usage": {"prompt_tokens": 12, "completion_tokens": 34}}
+
+
+class FakeChatCompletions:
+    def __init__(self):
+        self.created = None
+
+    def create(self, **kwargs):
+        self.created = kwargs
+        return FakeChatCompletion()
+
+
+class FakeNvidiaClient:
+    def __init__(self):
+        self.chat = type("Chat", (), {"completions": FakeChatCompletions()})()
+
+
 def test_openai_adapter_is_backgrounded_bounded_and_web_search_only():
     settings = replace(get_settings(), openai_api_key="test", provider="openai")
     provider = OpenAIProvider(settings)
@@ -75,3 +105,24 @@ def test_openai_adapter_resumes_existing_background_response():
     )
     assert provider.client.responses.created is None
     assert json.loads(json.dumps(result.report))["product"]["name"] == "SignalDesk"
+
+
+def test_nvidia_adapter_uses_nemotron_chat_completions():
+    settings = replace(
+        get_settings(),
+        nvidia_api_key="test",
+        nvidia_model="nvidia/llama-3.3-nemotron-super-49b-v1",
+        provider="nvidia",
+    )
+    provider = NvidiaProvider(settings)
+    provider.client = FakeNvidiaClient()
+    created_ids = []
+    result = provider.run(
+        build_prompt("https://example.com", "Test product", "quick", "general"),
+        on_created=created_ids.append,
+    )
+    request = provider.client.chat.completions.created
+    assert request["model"] == "nvidia/llama-3.3-nemotron-super-49b-v1"
+    assert request["response_format"] == {"type": "json_object"}
+    assert created_ids == ["chatcmpl_test"]
+    assert result.usage["completion_tokens"] == 34

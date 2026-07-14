@@ -138,6 +138,85 @@ class OpenAIProvider:
         )
 
 
+class NvidiaProvider:
+    """OpenAI-compatible NVIDIA NIM adapter for a configured Nemotron model."""
+
+    def __init__(self, settings: Settings):
+        self.settings = settings
+        self.client = OpenAI(
+            api_key=settings.nvidia_api_key,
+            base_url=settings.nvidia_base_url,
+            timeout=120.0,
+            max_retries=2,
+        )
+
+    def _complete(self, messages: list[dict[str, str]], on_created: Callable[[str], None] | None) -> ProviderResult:
+        completion = self.client.chat.completions.create(
+            model=self.settings.nvidia_model,
+            messages=messages,
+            temperature=0.6,
+            top_p=0.95,
+            max_tokens=30_000,
+            response_format={"type": "json_object"},
+        )
+        response_id = completion.id
+        if on_created:
+            on_created(response_id)
+        content = completion.choices[0].message.content or ""
+        try:
+            report = json.loads(content)
+        except json.JSONDecodeError as error:
+            raise RuntimeError("NVIDIA returned invalid report JSON") from error
+        raw = completion.model_dump(mode="json")
+        found: dict[str, dict[str, str]] = {}
+        _collect_sources(raw, found)
+        usage = raw.get("usage") if isinstance(raw.get("usage"), dict) else {}
+        return ProviderResult(report=report, response_id=response_id, source_ledger=list(found.values()), usage=usage)
+
+    def run(
+        self,
+        prompt: PromptBundle,
+        *,
+        response_id: str | None = None,
+        on_created: Callable[[str], None] | None = None,
+        on_poll: Callable[[], None] | None = None,
+    ) -> ProviderResult:
+        del response_id, on_poll
+        return self._complete(
+            [
+                {"role": "system", "content": prompt.instructions},
+                {"role": "user", "content": prompt.input_text},
+            ],
+            on_created,
+        )
+
+    def repair(
+        self,
+        previous: ProviderResult,
+        validation_errors: list[str],
+        *,
+        on_created: Callable[[str], None] | None = None,
+        on_poll: Callable[[], None] | None = None,
+    ) -> ProviderResult:
+        del on_poll
+        return self._complete(
+            [
+                {
+                    "role": "system",
+                    "content": "Return only corrected JSON matching the report contract. Do not add new URLs or claims.",
+                },
+                {
+                    "role": "user",
+                    "content": "Previous report:\n"
+                    + json.dumps(previous.report, ensure_ascii=False)
+                    + "\nValidation errors:\n- "
+                    + "\n- ".join(validation_errors[:40]),
+                },
+            ],
+            on_created,
+        )
+
+
 class FixtureProvider:
     def run(self, prompt: PromptBundle, **kwargs) -> ProviderResult:
         del prompt
@@ -161,4 +240,6 @@ def provider_for(settings: Settings):
         return FixtureProvider()
     if settings.provider == "openai":
         return OpenAIProvider(settings)
+    if settings.provider == "nvidia":
+        return NvidiaProvider(settings)
     raise RuntimeError(f"Unsupported provider: {settings.provider}")

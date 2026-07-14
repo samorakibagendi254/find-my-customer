@@ -27,6 +27,9 @@ class Settings:
     allowed_emails: tuple[str, ...]
     openai_api_key: str
     openai_model: str
+    nvidia_api_key: str
+    nvidia_base_url: str
+    nvidia_model: str
     provider: str
     release_sha: str
     worker_poll_seconds: float
@@ -48,8 +51,10 @@ class Settings:
                 raise RuntimeError("Cloudflare Access team domain and audience are required")
         if role == "worker" and self.provider == "openai" and not self.openai_api_key:
             raise RuntimeError("OPENAI_API_KEY is required by the production worker")
-        if self.production and self.provider != "openai":
-            raise RuntimeError("production requires FMC_PROVIDER=openai")
+        if role == "worker" and self.provider == "nvidia" and not self.nvidia_api_key:
+            raise RuntimeError("NVIDIA_API_KEY is required by the production worker")
+        if self.production and self.provider not in {"openai", "nvidia"}:
+            raise RuntimeError("production requires FMC_PROVIDER=openai or nvidia")
         if self.production and self.database_url.startswith("sqlite"):
             raise RuntimeError("production requires PostgreSQL")
 
@@ -73,6 +78,9 @@ def get_settings() -> Settings:
         allowed_emails=emails,
         openai_api_key=_secret("OPENAI_API_KEY"),
         openai_model=os.getenv("FMC_OPENAI_MODEL", "gpt-5.2").strip(),
+        nvidia_api_key=_secret("NVIDIA_API_KEY"),
+        nvidia_base_url=os.getenv("FMC_NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1").rstrip("/"),
+        nvidia_model=os.getenv("FMC_NVIDIA_MODEL", "nvidia/llama-3.3-nemotron-super-49b-v1").strip(),
         provider=os.getenv("FMC_PROVIDER", "fixture").strip().lower(),
         release_sha=os.getenv("FMC_RELEASE_SHA", "development").strip(),
         worker_poll_seconds=float(os.getenv("FMC_WORKER_POLL_SECONDS", "2")),

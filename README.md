@@ -18,7 +18,7 @@ The repository is the source of truth. The `find-first-customers/` directory is 
 - Atomic cross-platform installation
 - Standard-library Python implementation with no runtime dependencies
 - Durable portal runs, events, artifacts, and release identity
-- OpenAI Responses API research with built-in web search only
+- OpenAI Responses API or NVIDIA NIM research with the configured Nemotron model
 - Self-hosted Argon2id login with expiring, revocable database sessions
 
 The skill never sends messages automatically and never treats a public signal as consent or confirmed buying intent.
@@ -49,7 +49,7 @@ On macOS or Linux, use `.venv/bin/python` and `export FMC_PROVIDER=fixture` inst
 1. The portal validates the public HTTP(S) startup URL without fetching it.
 2. PostgreSQL stores an immutable input artifact and queues the run.
 3. A leased worker assembles a prompt from the versioned skill documents.
-4. The OpenAI Responses API receives only the built-in `web_search` tool.
+4. OpenAI uses only its built-in `web_search` tool; NVIDIA NIM uses OpenAI-compatible chat completions and does not receive arbitrary tools.
 5. The worker captures the provider source ledger and rejects evidence URLs absent from it.
 6. The canonical validator calculates scores and permits at most one bounded schema repair.
 7. Normalized JSON and escaped standalone HTML are stored with SHA-256 hashes.
@@ -131,7 +131,7 @@ The example uses `example.com` URLs and is explicitly synthetic. It tests behavi
 Production runs as an isolated Compose project in `/opt/find-my-customer`:
 
 - `app` — FastAPI/Jinja portal on loopback-only `127.0.0.1:4314`
-- `worker` — OpenAI research worker with the API key as a Docker secret
+- `worker` — provider-backed research worker with the provider key as a Docker secret
 - `postgres` — private durable run and artifact store
 - `migrate` — one-shot additive schema migration
 
@@ -142,12 +142,12 @@ See `deploy/README.md` for immutable release, verification, backup, and rollback
 ## Security boundaries
 
 - User-submitted websites are never fetched by the application server.
-- Only OpenAI's built-in web search is available to the model; there is no shell, filesystem, browser, or arbitrary HTTP tool.
+- The worker has no shell, filesystem, browser, or arbitrary HTTP tool. OpenAI runs with built-in web search; NVIDIA NIM runs the configured Nemotron chat model without tool calls.
 - Public source text is treated as hostile prompt-injection content.
 - Mutations require same-origin CSRF validation and per-owner quotas.
 - Every artifact route rechecks ownership.
 - Reports are escaped, CSP-restricted, and sandboxed when embedded.
-- Production refuses fixture mode, SQLite, missing local-login secrets, or a missing worker API key.
+- Production refuses fixture mode, SQLite, missing local-login secrets, unsupported providers, or a missing provider API key.
 
 ## Scoring
 

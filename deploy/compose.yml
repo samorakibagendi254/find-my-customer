@@ -70,10 +70,10 @@ services:
     command: ["python", "-m", "find_my_customer.worker"]
     environment:
       DATABASE_URL_FILE: /run/secrets/database_url
-      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
+      NVIDIA_API_KEY_FILE: /run/secrets/nvidia_api_key
     secrets:
       - database_url
-      - openai_api_key
+      - nvidia_api_key
     networks:
       - app
       - egress
@@ -131,7 +131,7 @@ secrets:
     file: ./secrets/database_url
   postgres_password:
     file: ./secrets/postgres_password
-  openai_api_key:
-    file: ./secrets/openai_api_key
+  nvidia_api_key:
+    file: ./secrets/nvidia_api_key
   admin_password_hash:
     file: ./secrets/admin_password_hash
