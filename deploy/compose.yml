@@ -71,9 +71,11 @@ services:
     environment:
       DATABASE_URL_FILE: /run/secrets/database_url
       NVIDIA_API_KEY_FILE: /run/secrets/nvidia_api_key
+      FMC_ADMIN_PASSWORD_HASH_FILE: /run/secrets/admin_password_hash
     secrets:
       - database_url
       - nvidia_api_key
+      - admin_password_hash
     networks:
       - app
       - egress
