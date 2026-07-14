@@ -1,0 +1,41 @@
+{
+  "name": "codex-find-first-customers-skill",
+  "version": "0.1.0",
+  "description": "An auditable Codex skill for finding evidence-backed potential first customers from public signals.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "codex-find-first-customers-skill": "scripts/install.js"
+  },
+  "files": [
+    "find-first-customers/SKILL.md",
+    "find-first-customers/agents/openai.yaml",
+    "find-first-customers/assets/report.css",
+    "find-first-customers/references/*.md",
+    "find-first-customers/references/*.json",
+    "find-first-customers/scripts/*.py",
+    "scripts/install.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "python -m unittest discover -s tests -v",
+    "validate:example": "python find-first-customers/scripts/validate_report.py examples/analysis.example.json",
+    "report:example": "python find-first-customers/scripts/generate_report.py examples/analysis.example.json outputs/example-report.html",
+    "pack:check": "npm pack --dry-run"
+  },
+  "keywords": [
+    "codex",
+    "skill",
+    "startup",
+    "customer-discovery",
+    "early-adopters",
+    "prospecting",
+    "public-signals"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

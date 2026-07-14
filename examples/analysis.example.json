@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "title": "SignalDesk — First Customer Report",
+  "generated_at": "2026-07-14",
+  "mode": "standard",
+  "focus": "general",
+  "product": {
+    "name": "SignalDesk",
+    "summary": "A lightweight workflow that turns scattered customer feedback into a prioritized evidence ledger.",
+    "url": "https://example.com/signaldesk",
+    "outcome": "Product teams spend less time consolidating feedback and can explain why an issue is prioritized.",
+    "pricing_motion": "Founder-led B2B subscription with a design-partner pilot.",
+    "geography": "English-speaking remote software teams"
+  },
+  "icp": {
+    "primary": {
+      "user": "Product managers at seed-to-Series A SaaS companies",
+      "buyer": "Head of Product or product-led founder",
+      "job": "Consolidate feedback from support, sales, interviews, and public discussions into defensible priorities",
+      "trigger": "Feedback volume grows beyond one person's ability to track manually",
+      "current_alternative": "Spreadsheets, shared documents, and manual tagging"
+    },
+    "adjacent": {
+      "user": "Customer-success leads at small B2B software companies",
+      "buyer": "VP Customer Success or founder",
+      "job": "Surface repeated customer problems and route them to product",
+      "trigger": "Expansion or churn reviews reveal inconsistent feedback follow-through",
+      "current_alternative": "CRM notes, support tags, and recurring internal meetings"
+    },
+    "disqualifiers": [
+      "Teams with fewer than ten meaningful feedback items per month",
+      "Enterprises requiring an immediate on-premise deployment",
+      "Prospects without a visible product-feedback workflow or trigger"
+    ]
+  },
+  "research": {
+    "scope": "Synthetic fixture using public-style product discussions and official pages from the prior 90 days",
+    "searched_at": "2026-07-14",
+    "source_types": [
+      "Public community",
+      "GitHub issue",
+      "Official job post"
+    ]
+  },
+  "verdict": {
+    "summary": "The strongest initial wedge is small SaaS product teams visibly struggling to reconcile feedback across tools before roadmap reviews.",
+    "confidence": "medium",
+    "rationale": [
+      "All shortlisted prospects show a public pain or timing signal tied to feedback consolidation.",
+      "The highest-confidence prospect explicitly describes the manual workaround.",
+      "Buying authority and current urgency still require confirmation through manual conversations."
+    ]
+  },
+  "prospects": [
+    {
+      "id": "northstar-labs",
+      "name": "Northstar Labs",
+      "type": "SaaS company",
+      "stage": "problem-aware",
+      "pain_signal": "A product lead publicly described copying feedback from support and sales into a spreadsheet before every roadmap review.",
+      "why_fit": "SignalDesk replaces the evidenced consolidation step while preserving a source trail for prioritization decisions.",
+      "why_now": "The discussion was posted this month and describes an active recurring workflow.",
+      "evidence": {
+        "observed": [
+          "The public post describes feedback arriving through support and sales.",
+          "The team manually copies the feedback into a spreadsheet before roadmap review."
+        ],
+        "inferred": [
+          "The repeated pre-review work may be costly enough to justify a design-partner pilot."
+        ]
+      },
+      "sources": [
+        {
+          "title": "How are small product teams consolidating feedback?",
+          "url": "https://example.com/community/northstar-feedback",
+          "type": "Public community",
+          "published_at": "2026-07-08",
+          "checked_at": "2026-07-14",
+          "evidence": "The author outlines a recurring copy-and-tag spreadsheet workflow and asks how peers avoid losing context."
+        }
+      ],
+      "dimensions": {
+        "pain_strength": 5,
+        "product_fit": 5,
+        "timing": 4,
+        "reachability": 4,
+        "evidence_quality": 4
+      },
+      "contact": {
+        "route_type": "public-thread",
+        "route_url": "https://example.com/community/northstar-feedback",
+        "target_role": "Product lead",
+        "rationale": "The original public discussion is the most contextual and least presumptive route."
+      },
+      "outreach": {
+        "offer": "A two-minute example of an evidence-led feedback ledger built from the workflow described.",
+        "cta": "Ask whether the author wants the example or can route it to whoever owns roadmap preparation.",
+        "opener": "Saw your description of copying support and sales feedback into a roadmap spreadsheet. We are testing a source-linked feedback ledger for that exact review workflow. Worth sharing a two-minute example, or is someone else on the product team closer to this process?",
+        "likely_objection": "The existing spreadsheet may feel adequate despite its manual cost."
+      },
+      "caution": "Confirm that the workflow remains active and do not imply that a public question signals purchase intent."
+    },
+    {
+      "id": "orbitstack",
+      "name": "OrbitStack",
+      "type": "Open-source software company",
+      "stage": "high-intent",
+      "pain_signal": "A public issue requests a way to deduplicate related feature requests while retaining links to the original discussions.",
+      "why_fit": "The requested deduplication and provenance closely match SignalDesk's core outcome.",
+      "why_now": "The issue is open and has recent maintainer activity.",
+      "evidence": {
+        "observed": [
+          "The issue asks for deduplication of related requests.",
+          "The issue explicitly requires links back to original discussions."
+        ],
+        "inferred": [
+          "Maintainer activity suggests the workflow is still under active consideration."
+        ]
+      },
+      "sources": [
+        {
+          "title": "Preserve request provenance when merging duplicates",
+          "url": "https://example.com/orbitstack/issues/184",
+          "type": "GitHub issue",
+          "published_at": "2026-06-19",
+          "checked_at": "2026-07-14",
+          "evidence": "The issue asks for a repeatable way to group feedback without losing the source trail."
+        }
+      ],
+      "dimensions": {
+        "pain_strength": 4,
+        "product_fit": 4,
+        "timing": 4,
+        "reachability": 3,
+        "evidence_quality": 4
+      },
+      "score": 77,
+      "contact": {
+        "route_type": "public-thread",
+        "route_url": "https://example.com/orbitstack/issues/184",
+        "target_role": "Maintainer responsible for product feedback",
+        "rationale": "The public issue permits a contextual question, but maintainership does not prove buying authority."
+      },
+      "outreach": {
+        "offer": "A small mockup showing grouped requests with retained source links.",
+        "cta": "Ask whether the mockup reflects the requirement before discussing any product.",
+        "opener": "Your issue about merging related requests without losing their source links maps closely to a workflow we are prototyping. I can share a small mockup of grouped feedback with retained provenance. Would that help validate the requirement, or should I leave the discussion focused on the current implementation?",
+        "likely_objection": "The team may prefer a native open-source implementation rather than a separate product."
+      },
+      "caution": "Treat the repository as a technical signal, not proof of budget or commercial interest."
+    },
+    {
+      "id": "harborcloud",
+      "name": "HarborCloud",
+      "type": "B2B software company",
+      "stage": "trigger-present",
+      "pain_signal": "An official product-operations job post says the new hire will centralize customer feedback from several go-to-market teams.",
+      "why_fit": "The planned responsibility implies a cross-team feedback workflow that SignalDesk is designed to support.",
+      "why_now": "The company is actively creating ownership for the workflow.",
+      "evidence": {
+        "observed": [
+          "The official job post assigns responsibility for centralizing customer feedback.",
+          "The role works across support, success, sales, and product."
+        ],
+        "inferred": [
+          "The company may be evaluating process or tooling changes as the role is established."
+        ]
+      },
+      "sources": [
+        {
+          "title": "Product Operations Manager",
+          "url": "https://example.com/harborcloud/jobs/product-operations",
+          "type": "Official job post",
+          "published_at": "2026-07-02",
+          "checked_at": "2026-07-14",
+          "evidence": "The responsibilities include creating one feedback intake and prioritization process across four teams."
+        }
+      ],
+      "dimensions": {
+        "pain_strength": 3,
+        "product_fit": 4,
+        "timing": 3,
+        "reachability": 3,
+        "evidence_quality": 3
+      },
+      "contact": {
+        "route_type": "company-page",
+        "route_url": "https://example.com/harborcloud",
+        "target_role": "Head of Product or incoming Product Operations Manager",
+        "rationale": "Only an official company route is visible; no direct relevant public profile was found."
+      },
+      "outreach": {
+        "offer": "A concise checklist for setting up an auditable cross-team feedback intake.",
+        "cta": "Ask whether the checklist should be routed to product leadership or the incoming operations owner.",
+        "opener": "I noticed the Product Operations role will centralize feedback across support, success, sales, and product. We have a short setup checklist for keeping that intake source-linked and reviewable. Worth routing it to product leadership now, or is it better saved for the incoming operations owner?",
+        "likely_objection": "The company may be defining the process before selecting any tooling."
+      },
+      "caution": "A hiring trigger establishes timing, not a confirmed tooling problem."
+    }
+  ],
+  "patterns": [
+    {
+      "title": "Feedback loses context during consolidation",
+      "count": 2,
+      "insight": "The strongest product message is not generic collection; it is retaining provenance while grouping repeated feedback.",
+      "supporting_prospect_ids": [
+        "northstar-labs",
+        "orbitstack"
+      ]
+    },
+    {
+      "title": "Cross-team intake creates ownership pressure",
+      "count": 2,
+      "insight": "Roadmap reviews and new product-operations ownership are practical adoption triggers.",
+      "supporting_prospect_ids": [
+        "northstar-labs",
+        "harborcloud"
+      ]
+    }
+  ],
+  "outreach_plan": {
+    "angle": "Validate the provenance problem before offering software.",
+    "steps": [
+      {
+        "day": 1,
+        "action": "Open every source again, confirm the signal remains public, and contact only the two highest-scoring prospects through the documented route.",
+        "success_signal": "One reply that confirms or corrects the workflow."
+      },
+      {
+        "day": 3,
+        "action": "Send the promised mockup or checklist only to prospects who accepted the first CTA.",
+        "success_signal": "A prospect identifies a missing requirement or asks to involve the workflow owner."
+      },
+      {
+        "day": 6,
+        "action": "Follow up once with new evidence from the conversation, then close the loop without repeated messaging.",
+        "success_signal": "One design-partner conversation is scheduled or the hypothesis is explicitly rejected."
+      }
+    ],
+    "success_metric": "Three substantive conversations and one design-partner commitment within seven days."
+  },
+  "limitations": [
+    "This is a synthetic test fixture; its example.com sources do not represent real prospects.",
+    "Public signals establish relevance, not consent, budget, authority, or intent to buy.",
+    "Current workflow, ownership, and urgency must be confirmed manually before any pitch."
+  ]
+}

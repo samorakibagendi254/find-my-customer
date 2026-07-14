@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/find-first-customers/report.schema.json",
+  "title": "Find First Customers report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "title",
+    "generated_at",
+    "mode",
+    "focus",
+    "product",
+    "icp",
+    "research",
+    "verdict",
+    "prospects",
+    "patterns",
+    "outreach_plan",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "title": { "$ref": "#/$defs/nonEmptyString" },
+    "generated_at": { "$ref": "#/$defs/date" },
+    "mode": {
+      "enum": ["quick", "standard", "deep"]
+    },
+    "focus": {
+      "enum": ["general", "design-partners", "b2b", "community"]
+    },
+    "product": { "$ref": "#/$defs/product" },
+    "icp": { "$ref": "#/$defs/icp" },
+    "research": { "$ref": "#/$defs/research" },
+    "verdict": { "$ref": "#/$defs/verdict" },
+    "prospects": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/prospect" }
+    },
+    "patterns": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/pattern" }
+    },
+    "outreach_plan": { "$ref": "#/$defs/outreachPlan" },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "httpUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://"
+    },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "summary", "url", "outcome", "pricing_motion", "geography"],
+      "properties": {
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "summary": { "$ref": "#/$defs/nonEmptyString" },
+        "url": {
+          "oneOf": [
+            { "$ref": "#/$defs/httpUrl" },
+            { "type": "null" }
+          ]
+        },
+        "outcome": { "$ref": "#/$defs/nonEmptyString" },
+        "pricing_motion": { "$ref": "#/$defs/nonEmptyString" },
+        "geography": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user", "buyer", "job", "trigger", "current_alternative"],
+      "properties": {
+        "user": { "$ref": "#/$defs/nonEmptyString" },
+        "buyer": { "$ref": "#/$defs/nonEmptyString" },
+        "job": { "$ref": "#/$defs/nonEmptyString" },
+        "trigger": { "$ref": "#/$defs/nonEmptyString" },
+        "current_alternative": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "icp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "adjacent", "disqualifiers"],
+      "properties": {
+        "primary": { "$ref": "#/$defs/profile" },
+        "adjacent": { "$ref": "#/$defs/profile" },
+        "disqualifiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "research": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "searched_at", "source_types"],
+      "properties": {
+        "scope": { "$ref": "#/$defs/nonEmptyString" },
+        "searched_at": { "$ref": "#/$defs/date" },
+        "source_types": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "confidence", "rationale"],
+      "properties": {
+        "summary": { "$ref": "#/$defs/nonEmptyString" },
+        "confidence": { "enum": ["high", "medium", "low"] },
+        "rationale": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "url", "type", "published_at", "checked_at", "evidence"],
+      "properties": {
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "url": { "$ref": "#/$defs/httpUrl" },
+        "type": { "$ref": "#/$defs/nonEmptyString" },
+        "published_at": {
+          "oneOf": [
+            { "$ref": "#/$defs/date" },
+            { "type": "null" }
+          ]
+        },
+        "checked_at": { "$ref": "#/$defs/date" },
+        "evidence": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observed", "inferred"],
+      "properties": {
+        "observed": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "inferred": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pain_strength", "product_fit", "timing", "reachability", "evidence_quality"],
+      "properties": {
+        "pain_strength": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "product_fit": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "timing": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "reachability": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "evidence_quality": { "type": "integer", "minimum": 0, "maximum": 5 }
+      }
+    },
+    "contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["route_type", "route_url", "target_role", "rationale"],
+      "properties": {
+        "route_type": {
+          "enum": ["public-thread", "official-form", "public-business-email", "professional-profile", "company-page", "none-found"]
+        },
+        "route_url": {
+          "oneOf": [
+            { "$ref": "#/$defs/httpUrl" },
+            { "type": "null" }
+          ]
+        },
+        "target_role": { "$ref": "#/$defs/nonEmptyString" },
+        "rationale": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "outreach": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offer", "cta", "opener", "likely_objection"],
+      "properties": {
+        "offer": { "$ref": "#/$defs/nonEmptyString" },
+        "cta": { "$ref": "#/$defs/nonEmptyString" },
+        "opener": { "$ref": "#/$defs/nonEmptyString" },
+        "likely_objection": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "prospect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "stage", "pain_signal", "why_fit", "why_now", "evidence", "sources", "dimensions", "contact", "outreach", "caution"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "type": { "$ref": "#/$defs/nonEmptyString" },
+        "stage": { "enum": ["high-intent", "problem-aware", "trigger-present"] },
+        "pain_signal": { "$ref": "#/$defs/nonEmptyString" },
+        "why_fit": { "$ref": "#/$defs/nonEmptyString" },
+        "why_now": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence": { "$ref": "#/$defs/evidence" },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/source" }
+        },
+        "dimensions": { "$ref": "#/$defs/dimensions" },
+        "score": { "type": "integer", "minimum": 0, "maximum": 100, "readOnly": true },
+        "contact": { "$ref": "#/$defs/contact" },
+        "outreach": { "$ref": "#/$defs/outreach" },
+        "caution": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "pattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "count", "insight", "supporting_prospect_ids"],
+      "properties": {
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "count": { "type": "integer", "minimum": 2 },
+        "insight": { "$ref": "#/$defs/nonEmptyString" },
+        "supporting_prospect_ids": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+          }
+        }
+      }
+    },
+    "planStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["day", "action", "success_signal"],
+      "properties": {
+        "day": { "type": "integer", "minimum": 1, "maximum": 7 },
+        "action": { "$ref": "#/$defs/nonEmptyString" },
+        "success_signal": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "outreachPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["angle", "steps", "success_metric"],
+      "properties": {
+        "angle": { "$ref": "#/$defs/nonEmptyString" },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 7,
+          "items": { "$ref": "#/$defs/planStep" }
+        },
+        "success_metric": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    }
+  }
+}

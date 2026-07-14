@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate skill structure
+        shell: bash
+        run: python -c "from pathlib import Path; text=Path('find-first-customers/SKILL.md').read_text(encoding='utf-8'); assert text.startswith('---\\nname: find-first-customers\\n'); assert 'description:' in text"
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+      - name: Check package contents
+        run: npm pack --dry-run
+

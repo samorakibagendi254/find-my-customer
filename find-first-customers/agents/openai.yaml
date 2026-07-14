@@ -1,0 +1,5 @@
+interface:
+  display_name: "Find First Customers"
+  short_description: "Find evidence-backed early customer prospects"
+  default_prompt: "Use $find-first-customers to analyze this startup, find qualified early-customer prospects from public signals, and create an auditable HTML report."
+
