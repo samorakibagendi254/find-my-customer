@@ -68,6 +68,8 @@ services:
     <<: *app
     container_name: find-my-customer-worker
     command: ["python", "-m", "find_my_customer.worker"]
+    healthcheck:
+      disable: true
     environment:
       DATABASE_URL_FILE: /run/secrets/database_url
       NVIDIA_API_KEY_FILE: /run/secrets/nvidia_api_key
