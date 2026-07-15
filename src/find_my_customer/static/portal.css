@@ -49,6 +49,8 @@ button, select { cursor: pointer; }
 .logout-form button:hover { border-color: var(--acid-dark); color: var(--acid); }
 .live-dot, .status-orb { flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(105,219,157,.12); }
 .site-footer { padding: 2rem 0 2.5rem; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 1rem; color: var(--dim); font: .68rem ui-monospace, monospace; text-transform: uppercase; letter-spacing: .08em; }
+.site-footer nav { display: flex; flex-wrap: wrap; gap: .8rem; }
+.site-footer a { text-decoration: none; }.site-footer a:hover { color: var(--acid); }
 
 .hero-grid { display: grid; gap: 2rem; padding: 3.2rem 0 4.5rem; }
 .hero-copy { min-width: 0; align-self: center; }
@@ -104,6 +106,12 @@ button, select { cursor: pointer; }
 .login-form label { margin-top: .55rem; color: #d5d8d1; font-size: .75rem; font-weight: 700; }
 .login-form input { width: 100%; color: var(--ink); background: #0d100e; border: 1px solid var(--line); border-radius: .75rem; padding: .82rem .9rem; }
 .login-form input:focus { border-color: var(--acid-dark); box-shadow: 0 0 0 4px rgba(201,255,74,.07); outline: none; }
+
+.legal-shell { width: min(760px, 100%); margin-inline: auto; padding: clamp(2.5rem, 7vw, 6rem) 0; }
+.legal-shell h1 { max-width: 700px; margin: 0; font-size: clamp(2.6rem, 7vw, 5.4rem); line-height: .96; letter-spacing: -.07em; }
+.legal-shell h2 { margin: 2rem 0 .5rem; font-size: 1.05rem; }
+.legal-shell p { color: #b7bbb2; line-height: 1.75; }
+.legal-shell .legal-updated { color: var(--dim); font: .62rem ui-monospace, monospace; text-transform: uppercase; }
 
 .runs-section { padding: 0 0 5rem; }
 .section-heading { align-items: end; padding-bottom: 1rem; border-bottom: 1px solid var(--line); }

@@ -60,6 +60,20 @@ def test_local_auth_redirects_and_sets_secure_session(local_portal):
     assert "founder@example.com" in client.get("/").text
 
 
+def test_legal_pages_are_public_and_project_specific(local_portal):
+    expected = {
+        "/terms": "Find My Customer Terms of Use",
+        "/privacy": "Find My Customer Privacy Notice",
+        "/deletion": "Delete Your Find My Customer Data",
+    }
+    for path, marker in expected.items():
+        response = local_portal.get(path, follow_redirects=False)
+        assert response.status_code == 200
+        assert marker in response.text
+        assert response.headers["content-type"].startswith("text/html")
+        assert response.headers["cache-control"] == "no-store"
+
+
 def test_bad_credentials_are_generic_and_rate_limited(local_portal):
     client = local_portal
     token = csrf(client)

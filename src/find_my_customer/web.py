@@ -118,7 +118,15 @@ async def security_headers(request: Request, call_next):
     elif request.method in {"POST", "PUT", "PATCH"} and content_length > 16_384:
         response = JSONResponse({"detail": "Request body too large"}, status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
     else:
-        public = request.url.path in {"/health/live", "/health/ready", "/api/release", "/login"} or request.url.path.startswith("/static/")
+        public = request.url.path in {
+            "/health/live",
+            "/health/ready",
+            "/api/release",
+            "/login",
+            "/terms",
+            "/privacy",
+            "/deletion",
+        } or request.url.path.startswith("/static/")
         if not public:
             try:
                 request.state.identity = current_identity(request)
@@ -150,7 +158,7 @@ async def security_headers(request: Request, call_next):
     if settings.production:
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     if (
-        request.url.path in {"/", "/login", "/logout"}
+        request.url.path in {"/", "/login", "/logout", "/terms", "/privacy", "/deletion"}
         or request.url.path.startswith("/api/auth")
         or request.url.path.startswith("/api/runs")
         or request.url.path.startswith("/runs/")
@@ -196,6 +204,33 @@ def login_page(request: Request):
     csrf = request.cookies.get("fmc_csrf") or new_csrf_token()
     response = templates.TemplateResponse(request=request, name="login.html", context={"csrf": csrf})
     return _csrf_response(response, csrf)
+
+
+@app.get("/terms", response_class=HTMLResponse)
+def terms(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="legal.html",
+        context={"page": "terms", "title": "Terms of Use", "heading": "Use public signals responsibly."},
+    )
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+def privacy(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="legal.html",
+        context={"page": "privacy", "title": "Privacy Notice", "heading": "Private research, clearly handled."},
+    )
+
+
+@app.get("/deletion", response_class=HTMLResponse)
+def deletion(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="legal.html",
+        context={"page": "deletion", "title": "Data Deletion", "heading": "Delete your account data."},
+    )
 
 
 @app.post("/login", response_class=HTMLResponse)

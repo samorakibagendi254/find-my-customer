@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "project": "find-my-customer",
+  "legal_pages": {
+    "terms": {
+      "url": "https://agentzero.kitabu.ai/terms",
+      "statuses": [200],
+      "content_type_prefix": "text/html",
+      "marker": "Find My Customer Terms of Use"
+    },
+    "privacy": {
+      "url": "https://agentzero.kitabu.ai/privacy",
+      "statuses": [200],
+      "content_type_prefix": "text/html",
+      "marker": "Find My Customer Privacy Notice"
+    },
+    "deletion": {
+      "url": "https://agentzero.kitabu.ai/deletion",
+      "statuses": [200],
+      "content_type_prefix": "text/html",
+      "marker": "Delete Your Find My Customer Data"
+    }
+  }
+}

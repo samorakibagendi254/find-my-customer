@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Find My Customer{% endblock %}
+{% block body_class %}legal-page{% endblock %}
+{% block content %}
+<article class="legal-shell">
+  <a class="back-link" href="/login">← Back to sign in</a>
+  <p class="eyebrow"><span></span> Public policy</p>
+  <h1>{{ heading }}</h1>
+  <p class="legal-updated">Effective 15 July 2026</p>
+
+  {% if page == 'terms' %}
+  <p>Find My Customer is a private, self-hosted research workspace for finding and evaluating potential early customers from public professional signals.</p>
+  <h2>Find My Customer Terms of Use</h2>
+  <p>You may use the service only for lawful customer research. Do not use it to scrape private data, infer protected traits, harass people, send automated outreach, or represent public interest as confirmed buying intent.</p>
+  <h2>Your responsibility</h2>
+  <p>Review every source and recommendation before contacting anyone. You are responsible for the accuracy, relevance, legality, and tone of any outreach you choose to send.</p>
+  <h2>Research output</h2>
+  <p>Scores and suggestions are decision support, not guarantees. Public information can be incomplete or outdated. The service may change or suspend a run when a provider, source, or infrastructure dependency is unavailable.</p>
+  <h2>Access and security</h2>
+  <p>Keep your login private and report suspected unauthorized access to the server administrator. Access may be revoked when these terms or applicable law are violated.</p>
+  {% elif page == 'privacy' %}
+  <p>This notice explains what the self-hosted portal stores and why.</p>
+  <h2>Find My Customer Privacy Notice</h2>
+  <p>The portal stores your account email, secure session records, mission inputs, workflow events, generated research reports, source links, and technical audit metadata needed to operate and secure the service.</p>
+  <h2>How information is used</h2>
+  <p>Information is used to authenticate you, run customer research, display progress and results, enforce usage limits, diagnose failures, and preserve an auditable record of each mission. The portal does not automatically send outreach.</p>
+  <h2>Research sources and AI providers</h2>
+  <p>Mission inputs are processed by the configured AI provider. Research reports may contain public professional information and source URLs. Do not enter secrets, private customer records, or sensitive personal data in a mission.</p>
+  <h2>Retention and security</h2>
+  <p>Data remains in the self-hosted database and release backups until the administrator removes it under the operating retention policy. Sessions expire, passwords are stored only as one-way hashes, and authenticated research routes are marked not to be cached.</p>
+  {% else %}
+  <p>You can request removal of your portal account and its associated research history.</p>
+  <h2>Delete Your Find My Customer Data</h2>
+  <p>Send the request to the administrator who provisioned your account, using the same registered email address. Include the words “Delete my Find My Customer data” and identify whether you want all missions removed or only specific run IDs.</p>
+  <h2>What will be removed</h2>
+  <p>After identity confirmation, the administrator will revoke active sessions and remove the account’s mission inputs, workflow events, reports, and stored artifacts from the live service.</p>
+  <h2>Backup limits</h2>
+  <p>Deleted records may remain in access-controlled disaster-recovery backups until those backups expire. Backups are not used for ordinary product activity and deleted data will not be intentionally restored except for disaster recovery.</p>
+  <h2>Before you request deletion</h2>
+  <p>Download any reports you need first. Deletion is permanent in the live service and completed research cannot be recovered afterward.</p>
+  {% endif %}
+</article>
+{% endblock %}
