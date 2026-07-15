@@ -1,71 +1,151 @@
 {% extends "base.html" %}
-{% block title %}Find My Customer — Research Console{% endblock %}
+{% block title %}Find My Customer — Discovery Workspace{% endblock %}
+{% block body_class %}workspace-page{% endblock %}
 {% block content %}
-<section class="hero-grid">
-  <div class="hero-copy">
-    <p class="eyebrow"><span></span> Customer discovery agent</p>
-    <h1>Find the people<br>already asking for <em>you.</em></h1>
-    <p class="hero-lede">Turn a startup URL into an evidence-backed shortlist of early customers, complete with public buying signals and thoughtful outreach openers.</p>
-    <div class="trust-strip" aria-label="Research principles">
-      <span>Original sources</span><span>Deterministic scores</span><span>No auto-send</span>
-    </div>
-  </div>
+<nav class="workspace-tabs" aria-label="Workspace views">
+  <button type="button" class="active" data-workspace-tab="mission">Mission</button>
+  <button type="button" data-workspace-tab="canvas">Discovery canvas</button>
+</nav>
 
-  <form class="composer" id="run-form" novalidate>
-    <div class="composer-head">
-      <div><p class="eyebrow">New mission</p><h2>Start a customer search</h2></div>
-      <span class="release">v {{ release }}</span>
-    </div>
-    <label for="startup-url">Startup URL</label>
-    <div class="url-field"><span aria-hidden="true">↗</span><input id="startup-url" name="startup_url" type="url" inputmode="url" autocomplete="url" placeholder="https://yourstartup.com" required></div>
-    <label for="description">What are you building? <small>Optional, but useful</small></label>
-    <textarea id="description" name="description" maxlength="1500" rows="4" placeholder="A crisp sentence about the product, outcome, and who it is for."></textarea>
-
-    <fieldset>
-      <legend>Research depth</legend>
-      <div class="choice-grid" data-choice-group>
-        <label><input type="radio" name="mode" value="quick"><span><b>Quick</b><small>Up to 5 leads</small></span></label>
-        <label><input type="radio" name="mode" value="standard" checked><span><b>Standard</b><small>Up to 10 leads</small></span></label>
-        <label><input type="radio" name="mode" value="deep"><span><b>Deep</b><small>Up to 20 leads</small></span></label>
+<section class="workspace-shell" data-mobile-view="mission">
+  <aside class="mission-rail" aria-label="Mission setup">
+    <form class="composer workspace-composer" id="run-form" novalidate>
+      <div class="composer-head">
+        <div><p class="eyebrow">New mission</p><h1>Find your next customers</h1></div>
+        <span class="release">v {{ release }}</span>
       </div>
-    </fieldset>
 
-    <label for="focus">Prospect focus</label>
-    <select id="focus" name="focus">
-      <option value="general">Best overall fit</option>
-      <option value="design-partners">Design partners</option>
-      <option value="b2b">B2B decision makers</option>
-      <option value="community">Community early adopters</option>
-    </select>
-    <p class="form-error" id="form-error" role="alert" hidden></p>
-    <button class="launch-button" type="submit" data-submit>
-      <span data-idle>Launch research</span>
-      <span class="loading-dots" data-loading hidden><i></i><i></i><i></i><span class="sr-only">Submitting</span></span>
-      <span data-done hidden>Mission queued ✓</span>
-      <b aria-hidden="true">↗</b>
-    </button>
-    <p class="privacy-note">Uses public professional signals only. Nothing is sent automatically.</p>
-  </form>
-</section>
+      <label for="startup-url">Startup URL</label>
+      <div class="url-field"><span aria-hidden="true">↗</span><input id="startup-url" name="startup_url" type="url" inputmode="url" autocomplete="url" placeholder="https://yourstartup.com" required></div>
 
-<section class="runs-section">
-  <header class="section-heading">
-    <div><p class="eyebrow">Mission control</p><h2>Recent research runs</h2></div>
-    <span>{{ runs|length }} retained</span>
-  </header>
-  {% if runs %}
-  <div class="run-list">
-    {% for run in runs %}
-    <a class="run-card" href="/runs/{{ run.id }}">
-      <span class="status-orb status-{{ run.status }}" aria-hidden="true"></span>
-      <div class="run-main"><b>{{ run.startup_url }}</b><small>{{ run.mode }} · {{ run.focus }} · {{ run.created_at.strftime('%d %b %Y, %H:%M') }}</small></div>
-      <span class="status-label">{{ run.stage|replace('-', ' ') }}</span>
-      <span class="arrow" aria-hidden="true">→</span>
-    </a>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="empty-state"><span class="empty-radar" aria-hidden="true"><i></i></span><div><h3>Your signal map starts here.</h3><p>Launch the first research run and this space becomes your prospect intelligence archive.</p></div></div>
-  {% endif %}
+      <label for="description">What are you building? <small>Optional</small></label>
+      <textarea id="description" name="description" maxlength="1500" rows="3" placeholder="Product, outcome, and ideal customer."></textarea>
+
+      <fieldset>
+        <legend>Research depth</legend>
+        <div class="choice-grid" data-choice-group>
+          <label><input type="radio" name="mode" value="quick"><span><b>Quick</b><small>5 leads</small></span></label>
+          <label><input type="radio" name="mode" value="standard" checked><span><b>Standard</b><small>10 leads</small></span></label>
+          <label><input type="radio" name="mode" value="deep"><span><b>Deep</b><small>20 leads</small></span></label>
+        </div>
+      </fieldset>
+
+      <label for="focus">Prospect focus</label>
+      <select id="focus" name="focus">
+        <option value="general">Best overall fit</option>
+        <option value="design-partners">Design partners</option>
+        <option value="b2b">B2B decision makers</option>
+        <option value="community">Community early adopters</option>
+      </select>
+
+      <p class="form-error" id="form-error" role="alert" tabindex="-1" hidden></p>
+      <button class="launch-button" type="submit" data-submit>
+        <span data-idle>Launch research</span>
+        <span class="loading-dots" data-loading hidden><i></i><i></i><i></i><span class="sr-only">Submitting</span></span>
+        <span data-done hidden>Mission queued ✓</span>
+        <b aria-hidden="true">↗</b>
+      </button>
+      <p class="privacy-note">Public professional signals only. Nothing is sent automatically.</p>
+    </form>
+
+    <section class="mission-history" aria-labelledby="mission-history-title">
+      <div class="history-heading">
+        <div><p class="eyebrow">Mission control</p><h2 id="mission-history-title">Recent missions</h2></div>
+        <span>{{ runs|length }}</span>
+      </div>
+      <div class="history-list" id="history-list">
+        {% for run in runs[:6] %}
+        <button type="button" class="history-item{% if selected_run and selected_run.id == run.id %} selected{% endif %}" data-run-select data-run-id="{{ run.id }}" data-run-status="{{ run.status }}">
+          <span class="history-orb status-{{ run.status }}" aria-hidden="true"></span>
+          <span><b>{{ run.startup_url|replace('https://', '')|replace('http://', '') }}</b><small>{{ run.mode }} · {{ run.created_at.strftime('%d %b, %H:%M') }}</small></span>
+          <em>{{ run.stage|replace('-', ' ') }}</em>
+        </button>
+        {% else %}
+        <p class="history-empty">Your completed missions will stay close at hand.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </aside>
+
+  <section
+    class="discovery-canvas"
+    id="discovery-canvas"
+    data-run-id="{{ selected_run.id if selected_run else '' }}"
+    data-run-status="{{ selected_run.status if selected_run else '' }}"
+    data-run-stage="{{ selected_run.stage if selected_run else '' }}"
+    aria-labelledby="canvas-title"
+  >
+    <header class="canvas-header">
+      <div>
+        <p class="eyebrow"><span></span> Customer discovery agent</p>
+        <h2 id="canvas-title">Discovery canvas</h2>
+      </div>
+      <div class="canvas-meta">
+        <span class="canvas-status" id="canvas-status" data-state="{{ selected_run.status if selected_run else 'ready' }}"><i aria-hidden="true"></i><span>{{ selected_run.stage|replace('-', ' ') if selected_run else 'Ready' }}</span></span>
+        <a class="audit-link" id="audit-link" href="{% if selected_run %}/runs/{{ selected_run.id }}{% else %}#{% endif %}"{% if not selected_run %} hidden{% endif %}>Audit trail ↗</a>
+      </div>
+    </header>
+
+    <div class="canvas-body">
+      <section class="canvas-empty" id="canvas-empty"{% if selected_run %} hidden{% endif %}>
+        <div class="signal-constellation" aria-hidden="true">
+          <span class="signal-core"><i></i><i></i><i></i></span>
+          <span class="signal-node node-one"></span><span class="signal-node node-two"></span><span class="signal-node node-three"></span><span class="signal-node node-four"></span>
+        </div>
+        <p class="eyebrow">Ready when you are</p>
+        <h3>Your customer map starts here.</h3>
+        <p>Launch a mission and this canvas becomes a live, evidence-led view of the work—then resolves into a ranked shortlist you can act on.</p>
+        <div class="canvas-capabilities">
+          <span><b>01</b> Read public signals</span>
+          <span><b>02</b> Audit fit and timing</span>
+          <span><b>03</b> Rank reachable leads</span>
+        </div>
+      </section>
+
+      <section class="canvas-live" id="canvas-live"{% if not selected_run or selected_run.status in ['completed', 'failed', 'cancelled'] %} hidden{% endif %}>
+        <div class="mission-context">
+          <div><p class="eyebrow">Active mission</p><h3 id="live-mission-url">{{ selected_run.startup_url if selected_run else '' }}</h3></div>
+          <div class="live-metrics"><span><b id="event-count">0</b> verified events</span><span><b id="elapsed-time">00:00</b> elapsed</span></div>
+        </div>
+
+        {% set stages = [('queued', 'Queued'), ('researching', 'Research'), ('qualifying', 'Qualify'), ('validating', 'Validate'), ('rendering', 'Prepare'), ('completed', 'Complete')] %}
+        <ol class="canvas-stage-track" id="canvas-stage-track" aria-label="Research stages">
+          {% for stage, label in stages %}
+          <li data-stage="{{ stage }}"><i>{{ loop.index }}</i><span>{{ label }}</span></li>
+          {% endfor %}
+        </ol>
+
+        <div class="live-workspace">
+          <section class="live-focus-panel">
+            <div class="panel-heading"><div><p class="eyebrow">Now working</p><h3 id="live-stage-title">Waiting for the worker</h3></div><span class="live-indicator"><i></i> Live</span></div>
+            <p class="live-stage-message" id="live-stage-message" role="status" aria-live="polite">The mission is queued and will begin shortly.</p>
+            <div class="stage-visual" aria-hidden="true">
+              {% for stage, label in stages[:-1] %}<span data-stage-visual="{{ stage }}"><i></i>{{ label }}</span>{% endfor %}
+            </div>
+            <p class="truth-note"><span>✓</span> This view reports observable workflow events only. It never invents browsing activity or hidden reasoning.</p>
+          </section>
+
+          <section class="activity-panel" aria-labelledby="activity-title">
+            <div class="panel-heading"><div><p class="eyebrow">Activity stream</p><h3 id="activity-title">What the agent is doing</h3></div></div>
+            <ol class="canvas-activity" id="canvas-activity" role="log" aria-live="off"></ol>
+          </section>
+        </div>
+      </section>
+
+      <section class="canvas-results" id="canvas-results" hidden>
+        <div class="results-summary">
+          <div><p class="eyebrow">Mission complete</p><h3 id="results-title">Qualified customer leads</h3><p id="results-verdict"></p></div>
+          <div class="result-metrics"><span><b id="lead-count">0</b> leads</span><span><b id="reachable-count">0</b> reachable</span><span><b id="confidence-level">—</b> confidence</span></div>
+        </div>
+        <div class="lead-column-head" aria-hidden="true"><span>Who</span><span>How to reach</span><span>Why selected</span></div>
+        <div class="lead-list" id="lead-list"></div>
+        <div class="results-actions"><a class="report-button" id="full-report-link" href="#">Open full report ↗</a><button type="button" class="secondary-button" data-new-mission>New mission</button></div>
+      </section>
+
+      <section class="canvas-failure" id="canvas-failure" role="alert" hidden>
+        <span class="failure-mark">!</span><p class="eyebrow">Mission interrupted</p><h3>Research could not be completed.</h3><p id="failure-message">Review the audit trail, adjust the mission, and try again.</p><button type="button" class="secondary-button" data-new-mission>Start another mission</button>
+      </section>
+    </div>
+  </section>
 </section>
 {% endblock %}

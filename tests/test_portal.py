@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -38,7 +40,8 @@ def test_public_url_rejects_local_and_private_hosts():
 def test_fixture_run_reaches_audited_report(portal):
     dashboard = portal.get("/")
     assert dashboard.status_code == 200
-    assert "Find the people" in dashboard.text
+    assert "Discovery canvas" in dashboard.text
+    assert "Your customer map starts here" in dashboard.text
     csrf = dashboard.cookies["fmc_csrf"]
 
     created = portal.post(
@@ -70,6 +73,16 @@ def test_fixture_run_reaches_audited_report(portal):
     assert "Immutable artifacts" in detail.text
     assert "sandbox" in detail.text
 
+    result = portal.get(f"/api/runs/{run_id}/result")
+    assert result.status_code == 200
+    assert result.json()["prospects"][0]["name"] == "Northstar Labs"
+    assert len(result.headers["x-artifact-sha256"]) == 64
+    assert result.headers["cache-control"] == "no-store"
+
+    selected_dashboard = portal.get(f"/?run={run_id}")
+    assert f'data-run-id="{run_id}"' in selected_dashboard.text
+    assert "data-run-select" in selected_dashboard.text
+
 
 def test_mutation_requires_csrf(portal):
     response = portal.post(
@@ -91,6 +104,15 @@ def test_static_assets_are_versioned_by_release(portal):
     assert response.status_code == 200
     assert "/static/portal.css?v=aaaaaaaaaaaa" in response.text
     assert "/static/portal.js?v=aaaaaaaaaaaa" in response.text
+
+
+def test_dashboard_javascript_keeps_new_mission_on_canvas():
+    script = (Path(__file__).parents[1] / "src" / "find_my_customer" / "static" / "portal.js").read_text(
+        encoding="utf-8"
+    )
+    assert "await canvas?.activateRun(payload.id)" in script
+    assert "window.location.assign(`/runs/" not in script
+    assert "/result`" in script
 
 
 def test_source_ledger_must_cover_every_evidence_url():

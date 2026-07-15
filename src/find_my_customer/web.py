@@ -149,7 +149,12 @@ async def security_headers(request: Request, call_next):
         )
     if settings.production:
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    if request.url.path in {"/login", "/logout"} or request.url.path.startswith("/api/auth"):
+    if (
+        request.url.path in {"/", "/login", "/logout"}
+        or request.url.path.startswith("/api/auth")
+        or request.url.path.startswith("/api/runs")
+        or request.url.path.startswith("/runs/")
+    ):
         response.headers["Cache-Control"] = "no-store"
     return response
 
@@ -270,10 +275,20 @@ def dashboard(request: Request):
     csrf = request.cookies.get("fmc_csrf") or new_csrf_token()
     with session_factory()() as session:
         runs = list_runs(session, identity.subject)
+    requested_run_id = request.query_params.get("run", "")
+    selected_run = next((run for run in runs if run.id == requested_run_id), None)
+    if selected_run is None:
+        selected_run = next((run for run in runs if run.status in {"queued", "running"}), None)
     response = templates.TemplateResponse(
         request=request,
         name="dashboard.html",
-        context={"identity": identity, "runs": runs, "csrf": csrf, "release": get_settings().release_sha[:12]},
+        context={
+            "identity": identity,
+            "runs": runs,
+            "selected_run": selected_run,
+            "csrf": csrf,
+            "release": get_settings().release_sha[:12],
+        },
     )
     response.set_cookie(
         "fmc_csrf",
@@ -344,6 +359,21 @@ def api_run(request: Request, run_id: str):
     return run_payload(_owned_run(run_id, _identity(request)))
 
 
+@app.get("/api/runs/{run_id}/result")
+def api_run_result(request: Request, run_id: str):
+    artifact = _artifact(run_id, "report-json", _identity(request))
+    try:
+        report = json.loads(artifact.body)
+    except json.JSONDecodeError as error:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Result artifact is invalid") from error
+    if not isinstance(report, dict):
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Result artifact is invalid")
+    return JSONResponse(
+        report,
+        headers={"Cache-Control": "no-store", "X-Artifact-SHA256": artifact.sha256},
+    )
+
+
 @app.get("/api/runs/{run_id}/events")
 async def run_events(request: Request, run_id: str):
     identity = _identity(request)
@@ -370,13 +400,21 @@ async def run_events(request: Request, run_id: str):
                 )
                 for event in events:
                     cursor = event.id
+                    try:
+                        payload = json.loads(event.payload_json)
+                    except json.JSONDecodeError:
+                        payload = {}
+                    if not isinstance(payload, dict):
+                        payload = {}
                     data = json.dumps(
                         {
+                            "schema_version": 1,
                             "id": event.id,
                             "type": event.event_type,
                             "stage": event.stage,
                             "message": event.message,
                             "created_at": event.created_at.isoformat(),
+                            "payload": payload,
                         },
                         separators=(",", ":"),
                     )
